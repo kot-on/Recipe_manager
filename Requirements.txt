@@ -1,0 +1,4 @@
+hashlib
+tkinter
+SQLcipher
+shutil
