@@ -11,7 +11,7 @@ def get_connection():
 def show_3_recipes(User_id,limit=3):
     conn = get_connection()
     cursor=conn.cursor()
-    cursor.execute("Select title, image_path, rating FROM recipes where User_id = ? LIMIT ?",(User_id,limit))
+    cursor.execute("Select title, description, rating, image_path FROM recipes where User_id = ? LIMIT ?",(User_id,limit))
     recipes = cursor.fetchall()
     conn.close()
     return recipes

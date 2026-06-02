@@ -8,6 +8,9 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..')) # не видет
 from AUTH.Login import login_user # нужно прописывать папку и файл + функция
 from Main_menu import open_main_window #Переброс в главное меню
 from PIL import Image,ImageTk
+
+
+
 root = Tk()
 root.title("Login window")
 root.geometry("700x500")

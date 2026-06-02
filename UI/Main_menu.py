@@ -15,48 +15,47 @@ def open_main_window(User_id):
     label.pack()
 
     Add_button = customtkinter.CTkButton(root,width=600,height=100,corner_radius=15,font=('Inter',12),text='Добавить рецепт',fg_color="#F54927")
-    Add_button.pack()
+    Add_button.pack(pady=15)
 
-    left_frame = Frame(root)
-    left_frame.pack(side=LEFT,fill=BOTH,expand=True)
-    right_frame = Frame(root)
-    right_frame.pack(side=LEFT,fill=BOTH,expand=True)
-    load_recipes(left_frame,right_frame,User_id)
+
+    load_recipes(User_id,root)
 
 
     root.mainloop()
 
 
-def load_recipes(left_frame,right_frame,User_id):
+def load_recipes(User_id,root):
     recipe = show_3_recipes(User_id)
 
-    if not recipe:  # список пустой
+    if not recipe: 
         Label(
-            right_frame,
+            root,
             text="У вас пока нет рецептов\nНажмите Добавить чтобы создать свой первый рецепт!",
             font=('Inter', 16),
             fg="gray"
-        ).pack(expand=True) 
+        ).grid( row=1, column=0, expand=True) 
         return
 
     for i, row in enumerate(recipe):
-        title = recipe[0]
-        description = recipe[1]
-        rating=recipe[2]
-        image_path = recipe[3]
-
+        title = row[0]
+        description = row[1]
+        rating=row[2]
+        image_path = row[3]
+        recipe_card = Frame(root,bg="#D15555" )
+        recipe_card.grid( row=i, column=0, padx=10, pady=10)
+        
         try:
             img = Image.open(image_path)
             img = img.resize((150,150))
             photo = ImageTk.PhotoImage(img)
         except:
             photo = ImageTk.PhotoImage(file="Default.png")
-        img_label = Label(left_frame, image=photo)
+        img_label = Label(recipe_card, image=photo)
         img_label.image = photo
         img_label.grid(row=i, column=0, padx=10, pady=10)
 
-        Label(right_frame, text=title, font=('Inter', 16)).grid(row=i, column=0)
-        Label(right_frame, text=f"Рейтинг: {rating}").grid(row=i, column=1)
-        Label(right_frame, text=description).grid(row=i, column=2)
+        Label(recipe_card, text=title, font=('Inter', 16),bg='Black',fg='white').grid(row=i, column=0, padx=10, pady=10)
+        Label(recipe_card, text=f"Рейтинг: {rating}",bg='Black',fg='white').grid(row=i, column=2, padx=10, pady=10)
+        Label(recipe_card, text=description,bg='Black',fg='white').grid(row=i, column=0, padx=10, pady=10)
 if __name__ == "__main__":
     open_main_window(User_id=1)

@@ -9,7 +9,7 @@ def register_user(username,password):
     
     cursor.execute(
         "Insert into users (login, password_hash) Values (?,?)",
-        (username,password_hash)  # тут sql инъекция + наши переменные передаем в бд
+        (username, password_hash)  # тут sql инъекция + наши переменные передаем в бд
     )
     conn.commit() #Твое любимое Слав, нужно, чтобы сохранять изменения в бд 
     conn.close() #Закрываем соединение с бд
