@@ -14,10 +14,14 @@ def login_user(username,password):
     row = cursor.fetchone()  # берём запись, чтобы дальше ее сравнить
     conn.close()
     
-    if row is None:
-        return False  # пользователь есть в бд? 
+    #if row is None:
+     #   return False  # пользователь есть в бд? 
     
-    return row[0] == password_hash  # Ну типа совпал пароль или нет
+    #return row[0] == password_hash  # Ну типа совпал пароль или нет
+
+    if row:
+        return row[0]
+    return None
 
 
     

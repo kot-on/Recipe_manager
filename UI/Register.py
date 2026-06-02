@@ -6,14 +6,21 @@ import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..')) #тоже самое для видимости файлов
 from AUTH.Register import register_user
 from Main_menu import open_main_window #Переброс в главное меню
+from PIL import Image,ImageTk
 def open_register(root):
     reg_window = Toplevel()
     reg_window.title("Register window")
     reg_window.geometry("700x500")
     reg_window.configure(bg='Black')
+    image_path = "Assets/Logo.png"
+    pil_image = Image.open(image_path) 
+    img = ImageTk.PhotoImage(pil_image)
+    Image_label = Label(reg_window,image=img,bg='black')
+    Image_label.image = img
+    Image_label.pack(pady=(20,5))
     
     label = Label(reg_window, text="Регистрация", fg='#585B91', font=('Inter', 50), bg='Black')
-    label.pack()
+    label.pack(pady=(0,20))
 
     entry_login = customtkinter.CTkEntry(reg_window,
                                          placeholder_text="Логин",
