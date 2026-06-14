@@ -3,12 +3,13 @@ from tkinter import messagebox
 import customtkinter
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(__file__), '..')) #тоже самое для видимости файлов
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from AUTH.Register import register_user
-from Main_menu import open_main_window #Переброс в главное меню
+from Main_menu import open_main_window
 from PIL import Image,ImageTk
 import re
-from AUTH.Login import login_user
+from Logger_logic import AuditLogger  # ← ДОБАВИТЬ
+
 def open_register(root):
     reg_window = Toplevel()
     reg_window.title("Register window")
@@ -27,21 +28,22 @@ def open_register(root):
     entry_login = customtkinter.CTkEntry(reg_window,
                                          placeholder_text="Логин",
                                          width=212, height=49,
-                                         corner_radius=10, font=('Inter', 25)) #Ввод логина
+                                         corner_radius=10, font=('Inter', 25))
     entry_login.pack(pady=10)
 
     entry_pass = customtkinter.CTkEntry(reg_window,
                                         placeholder_text="Пароль",
                                         width=212, height=49,
-                                        corner_radius=10, font=('Inter', 25),show='*') #Ввод пароля
+                                        corner_radius=10, font=('Inter', 25),show='*')
     entry_pass.pack(pady=10)
 
     entry_pass2 = customtkinter.CTkEntry(reg_window,
                                          placeholder_text="Повторите пароль",
                                          width=212, height=49,
-                                         corner_radius=10, font=('Inter', 25),show='*') # Ввод пароля для сверка
+                                         corner_radius=10, font=('Inter', 25),show='*')
     entry_pass2.pack(pady=10)
-    def register(): #Регистрация с проверкой пароля
+    
+    def register():
         username = entry_login.get()
         password1 = entry_pass.get()
         password2 = entry_pass2.get()
@@ -59,10 +61,12 @@ def open_register(root):
             return
 
         if password1 == password2:
-                User_id = register_user(username, password1)  # сразу получаем id
-                reg_window.destroy()
-                root.destroy()  # закрываем окно логина тоже
-                open_main_window(User_id)
+            User_id = register_user(username, password1)
+            # Логируем регистрацию
+            AuditLogger.log(User_id, username, "REGISTER", entity_type="USER", entity_id=User_id, details=f"Регистрация пользователя {username}", status="SUCCESS")
+            reg_window.destroy()
+            root.destroy()
+            open_main_window(User_id, username)  # ← передаём username
         else:
             messagebox.showerror("Ошибка", "Пароли не совпадают")
         return 
@@ -72,5 +76,5 @@ def open_register(root):
                                       width=212, height=49,
                                       fg_color='#63078E', font=('Inter', 25),
                                       corner_radius=10,
-                                      command=register) #Кнопка реги
+                                      command=register)
     btn_reg.pack(pady=10)
