@@ -9,8 +9,9 @@ from PIL import Image, ImageTk
 import shutil
 import uuid
 from Database.db import save_recipe as db_save_recipes
+from Logger_logic import AuditLogger
 
-def open_recipe_manager(root_parent, User_id, on_save=None):
+def open_recipe_manager(root_parent, User_id, username=None, on_save=None):
     root = Toplevel(root_parent)
     root.title("Новый рецепт")
     root.geometry("1600x1000")
@@ -26,7 +27,7 @@ def open_recipe_manager(root_parent, User_id, on_save=None):
 
     image_frame = Frame(root, bg='#1E1E1E', width=300, height=200)
     image_frame.pack(pady=10)
-    image_frame.pack_propagate(False)  # фиксируем размер
+    image_frame.pack_propagate(False)
 
     preview_label = Label(image_frame, text="Нажмите чтобы\nдобавить фото",
                           bg='#1E1E1E', fg='gray', font=('Inter', 14), cursor="hand2")
@@ -94,7 +95,6 @@ def open_recipe_manager(root_parent, User_id, on_save=None):
         if entry in ingredient_rows:
             ingredient_rows.remove(entry)
 
-    # Первая строка по умолчанию
     add_ingredient_row()
 
     customtkinter.CTkButton(center_frame, text="+ Добавить ингредиент",width=300, height=40, corner_radius=10,font=('Inter', 16), fg_color="#63078E",command=add_ingredient_row).pack(pady=10)
@@ -124,6 +124,7 @@ def open_recipe_manager(root_parent, User_id, on_save=None):
                                    command=lambda v=i: set_rating(v))
         btn.pack(side=LEFT, padx=2)
         star_buttons.append(btn)
+    
     def save_recipe():
         title = entry_title.get().strip()
         description = entry_description.get("1.0", "end").strip()
@@ -146,17 +147,19 @@ def open_recipe_manager(root_parent, User_id, on_save=None):
             messagebox.showerror("Ошибка", "Добавьте хотя бы один ингредиент")
             return
 
-    # Копируем картинку в Assets/recipes/
         if src_path:
-            ext = os.path.splitext(src_path)[1]  # .jpg / .png и т.д.
-            unique_name = f"{uuid.uuid4().hex}{ext}"  # уникальное имя файла
+            ext = os.path.splitext(src_path)[1]
+            unique_name = f"{uuid.uuid4().hex}{ext}"
             dest_path = os.path.join("Assets", "recipes", unique_name)
             shutil.copy(src_path, dest_path)
         else:
             dest_path = os.path.join("Assets", "default.png")
 
         try:
-            db_save_recipes(User_id, title, description, rating, dest_path, ingredients)
+            recipe_id = db_save_recipes(User_id, title, description, rating, dest_path, ingredients)
+            # Логируем создание рецепта
+            current_username = username if username else f"user_{User_id}"
+            AuditLogger.log(User_id, current_username, "CREATE_RECIPE", entity_type="RECIPE", entity_id=recipe_id, details=f"Создан рецепт: {title}", status="SUCCESS")
             messagebox.showinfo("Готово", f"Рецепт «{title}» сохранён!")
             root.destroy()
             if on_save:
@@ -166,9 +169,8 @@ def open_recipe_manager(root_parent, User_id, on_save=None):
 
     customtkinter.CTkButton(center_frame, text="Сохранить рецепт",width=620, height=55, corner_radius=15,font=('Inter', 22), fg_color="#F54927",command=save_recipe).pack(pady=15)
 
-
 if __name__ == "__main__":
     root = Tk()
     root.withdraw()
-    open_recipe_manager(root,User_id=1)
+    open_recipe_manager(root, User_id=1)
     root.mainloop()
