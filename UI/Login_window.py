@@ -3,13 +3,12 @@ import sys
 from tkinter import *
 from tkinter import messagebox
 import customtkinter
-from Register import open_register # Нужно для перехода в регу
-sys.path.append(os.path.join(os.path.dirname(__file__), '..')) # не видет другие файлы проекта, без этой команды
-from AUTH.Login import login_user # нужно прописывать папку и файл + функция
-from Main_menu import open_main_window #Переброс в главное меню
+from Register import open_register
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+from AUTH.Login import login_user
+from Main_menu import open_main_window
 from PIL import Image,ImageTk
 import re
-
 
 root = Tk()
 root.title("Login window")
@@ -27,19 +26,17 @@ entry_log = customtkinter.CTkEntry(root,
                                    width=212,
                                    height=49,
                                    corner_radius=10,
-                                   font=('Inter',25)
-                                   ) #поля ввода логина
+                                   font=('Inter',25))
 entry_log.pack(pady=10) 
 entry_pass = customtkinter.CTkEntry(root,
                                     placeholder_text="Пароль",
                                     width=212,
                                     height=49,
                                     corner_radius=10,
-                                    font=('Inter',25),show='*'
-                                    ) #поля ввода пароля
+                                    font=('Inter',25),show='*')
 entry_pass.pack(pady=10) 
 
-def Gotoregister(): # функци для перехода в регу
+def Gotoregister():
     root.withdraw()
     open_register(root) 
 
@@ -59,7 +56,7 @@ def login():
 
     if User_id:
         root.destroy()
-        open_main_window(User_id)
+        open_main_window(User_id, username)  # ← ИСПРАВЛЕНО
     else:
         messagebox.showerror("Ошибка", "Неверный логин или пароль")
 
@@ -70,8 +67,7 @@ btn = customtkinter.CTkButton(root,
                               fg_color='#63078E',
                               font=('Inter',30),
                               corner_radius=10,
-                              command=login
-                              ) #ВХОД
+                              command=login)
 btn.pack(pady=10) 
 btn2 = customtkinter.CTkButton(root,
                                text="Нет аккаунта",
@@ -81,6 +77,6 @@ btn2 = customtkinter.CTkButton(root,
                                font=('Inter',15, "underline"),
                                corner_radius=10,
                                text_color='#63078E',
-                               command=Gotoregister) #Рега 
+                               command=Gotoregister)
 btn2.pack(pady=10) 
 root.mainloop()
