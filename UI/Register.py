@@ -62,7 +62,6 @@ def open_register(root):
 
         if password1 == password2:
             User_id = register_user(username, password1)
-            # Логируем регистрацию
             AuditLogger.log(User_id, username, "REGISTER", entity_type="USER", entity_id=User_id, details=f"Регистрация пользователя {username}", status="SUCCESS")
             reg_window.destroy()
             root.destroy()
