@@ -7,7 +7,9 @@ from Database.db import show_3_recipes
 from PIL import Image, ImageTk
 from Recipe_manage import open_recipe_manager
 from Recipe_view import open_all_recipes
-def open_main_window(User_id):
+from UI_logger import open_logs_window
+
+def open_main_window(User_id, username=None):
     root = Tk()
     root.title("Recipe Manager")
     root.geometry("1600x900")
@@ -20,9 +22,9 @@ def open_main_window(User_id):
     logo_label.pack(pady=(20, 5))
     Label(root, text="Recipe manager", fg='#585B91', font=('Inter', 50), bg='Black').pack()
 
-    customtkinter.CTkButton(root, width=600, height=60,corner_radius=15, font=('Inter', 20), text='Добавить рецепт', fg_color="#F54927", command=lambda: open_recipe_manager(root, User_id,on_save=refresh)).pack(pady=15)
-
-    
+    customtkinter.CTkButton(root, width=600, height=60, corner_radius=15, font=('Inter', 20), 
+                            text='Добавить рецепт', fg_color="#F54927", 
+                            command=lambda: open_recipe_manager(root, User_id, username, on_save=refresh)).pack(pady=15)
 
     recipes_frame = Frame(root, bg='Black')
     recipes_frame.pack(fill=BOTH, expand=True)
@@ -36,11 +38,16 @@ def open_main_window(User_id):
         # Загружаем заново
         load_recipes(User_id, recipes_frame)
 
+    customtkinter.CTkButton(root, text="Показать все рецепты", width=200, height=23,
+                            fg_color='black', font=('Inter', 15, "underline"), corner_radius=10,
+                            text_color='#63078E', command=lambda: open_all_recipes(root, User_id)).pack(pady=10)
     
-    customtkinter.CTkButton(root,text="Показать все рецепты",width=200,height=23,fg_color='black',font=('Inter', 15, "underline"),corner_radius=10,
-    text_color='#63078E',command=lambda: open_all_recipes(root, User_id)).pack(pady=10)
+    # Кнопка "Журнал событий"
+    customtkinter.CTkButton(root, text="Журнал событий", width=200, height=23,
+                            fg_color='black', font=('Inter', 15, "underline"), corner_radius=10,
+                            text_color='#63078E', command=open_logs_window).pack(pady=10)
+    
     root.mainloop()
-
 
 def load_recipes(User_id, frame):
     recipes = show_3_recipes(User_id)
