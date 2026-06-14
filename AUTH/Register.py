@@ -12,4 +12,6 @@ def register_user(username,password):
         (username, password_hash)  # тут sql инъекция + наши переменные передаем в бд
     )
     conn.commit() #Твое любимое Слав, нужно, чтобы сохранять изменения в бд 
-    conn.close() #Закрываем соединение с бд
+    user_id = cursor.lastrowid  # id только что созданного пользователя
+    conn.close()
+    return user_id

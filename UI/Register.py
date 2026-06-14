@@ -7,6 +7,8 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..')) #тоже сам�
 from AUTH.Register import register_user
 from Main_menu import open_main_window #Переброс в главное меню
 from PIL import Image,ImageTk
+import re
+from AUTH.Login import login_user
 def open_register(root):
     reg_window = Toplevel()
     reg_window.title("Register window")
@@ -43,10 +45,24 @@ def open_register(root):
         username = entry_login.get()
         password1 = entry_pass.get()
         password2 = entry_pass2.get()
+
+        if not re.match(r'^[A-Za-z0-9!@#$%^&*()_+\-=\[\]{};:\'",.<>?/\\|`~ ]+$', username):
+            messagebox.showerror("Ошибка", "Логин должен содержать только латинские символы")
+            return
+    
+        if not re.match(r'^[A-Za-z0-9!@#$%^&*()_+\-=\[\]{};:\'",.<>?/\\|`~ ]+$', password1):
+            messagebox.showerror("Ошибка", "Пароль должен содержать только латинские символы")
+            return
+
+        if len(password1) < 8:
+            messagebox.showerror("Ошибка", "Пароль должен содержать 8 и более символов")
+            return
+
         if password1 == password2:
-            register_user(username,password1)
-            root.destroy()
-            open_main_window()
+                User_id = register_user(username, password1)  # сразу получаем id
+                reg_window.destroy()
+                root.destroy()  # закрываем окно логина тоже
+                open_main_window(User_id)
         else:
             messagebox.showerror("Ошибка", "Пароли не совпадают")
         return 

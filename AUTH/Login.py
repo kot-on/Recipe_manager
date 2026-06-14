@@ -1,26 +1,21 @@
 import hashlib
 from Database.db import get_connection
-def login_user(username,password):
+def login_user(username, password):
     password_hash = hashlib.sha256(password.encode()).hexdigest()
     
     conn = get_connection()
     cursor = conn.cursor()
     
     cursor.execute(
-        "SELECT password_hash FROM users WHERE login = ?",
-        (username,)  # запятая для tuple нкжна, tuple крч это как const в js, типо нельзя менять ну + sql инъекцию убирает 
+        "SELECT id, password_hash FROM users WHERE login = ?",
+        (username,)
     )
     
-    row = cursor.fetchone()  # берём запись, чтобы дальше ее сравнить
+    row = cursor.fetchone()
     conn.close()
     
-    #if row is None:
-     #   return False  # пользователь есть в бд? 
-    
-    #return row[0] == password_hash  # Ну типа совпал пароль или нет
-
-    if row:
-        return row[0]
+    if row and row[1] == password_hash:  # сравниваем хеши
+        return row[0]  # возвращаем id, а не хеш
     return None
 
 

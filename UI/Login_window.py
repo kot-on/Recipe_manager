@@ -8,7 +8,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..')) # не видет
 from AUTH.Login import login_user # нужно прописывать папку и файл + функция
 from Main_menu import open_main_window #Переброс в главное меню
 from PIL import Image,ImageTk
-
+import re
 
 
 root = Tk()
@@ -43,18 +43,26 @@ def Gotoregister(): # функци для перехода в регу
     root.withdraw()
     open_register(root) 
 
-def login(): # логин в приложение
-    User_id = login_user(entry_log.get(), entry_pass.get())
+def login():
+    username = entry_log.get()
+    password = entry_pass.get()
+
+    if not re.match(r'^[A-Za-z0-9!@#$%^&*()_+\-=\[\]{};:\'",.<>?/\\|`~ ]+$', username):
+        messagebox.showerror("Ошибка", "Логин должен содержать только латинские символы")
+        return
+    
+    if not re.match(r'^[A-Za-z0-9!@#$%^&*()_+\-=\[\]{};:\'",.<>?/\\|`~ ]+$', password):
+        messagebox.showerror("Ошибка", "Пароль должен содержать только латинские символы")
+        return
+
+    User_id = login_user(username, password)
 
     if User_id:
-        
-        root.destroy()  # закрываем окно логина
-
-
-        open_main_window(User_id)  # пользователь вошел
-
+        root.destroy()
+        open_main_window(User_id)
     else:
         messagebox.showerror("Ошибка", "Неверный логин или пароль")
+
 btn = customtkinter.CTkButton(root,
                               text="Войти",
                               width=212,
