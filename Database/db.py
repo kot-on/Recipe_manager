@@ -1,8 +1,7 @@
 import sqlite3
 import os
-from Logger_logic import AuditLogger
+
 # Путь к бд, чтобы не писать его везде
-# Семен тебе нужно будет работать с шифрованием этого канала подключения к бд
 DB_PATH = os.path.join(os.path.dirname(__file__), '..', 'bd.db')
 
 def get_connection():
@@ -26,7 +25,7 @@ def show_3_recipes(User_id, limit=3):
             "SELECT name, amount, unit FROM ingredients WHERE recipe_id = ?",
             (recipe_id,)
         )
-        ingredients = cursor.fetchall()  # список кортежей ("мука", "200", "г")
+        ingredients = cursor.fetchall()
 
         result.append({
             "id": recipe_id,
@@ -44,14 +43,12 @@ def save_recipe(user_id, title, description, rating, image_path, ingredients):
     conn = get_connection()
     cursor = conn.cursor()
 
-    # Сохраняем рецепт
     cursor.execute(
         "INSERT INTO recipes (user_id, title, description, rating, image_path) VALUES (?, ?, ?, ?, ?)",
         (user_id, title, description, rating, image_path)
     )
-    recipe_id = cursor.lastrowid  # id только что созданного рецепта
+    recipe_id = cursor.lastrowid
 
-    # Сохраняем каждый ингредиент
     for name, amount, unit in ingredients:
         cursor.execute(
             "INSERT INTO ingredients (recipe_id, name, amount, unit) VALUES (?, ?, ?, ?)",
