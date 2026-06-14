@@ -16,15 +16,14 @@ def register_user(username, password):
     cursor.execute("SELECT id FROM users WHERE username = ?", (username,))
     if cursor.fetchone():
         conn.close()
-        return None  # Пользователь уже есть
+        return None
     
-    # Исправлено: username и password (а не login и password_hash)
     cursor.execute(
         "INSERT INTO users (username, password) VALUES (?, ?)",
         (username, password_hash)
     )
-    conn.commit()  # Твое любимое Слав, нужно, чтобы сохранять изменения в бд
-    user_id = cursor.lastrowid  # id только что созданного пользователя
+    conn.commit()
+    user_id = cursor.lastrowid
     
     # Логируем регистрацию
     AuditLogger.log(user_id, username, "REGISTER", entity_type="USER", entity_id=user_id, details=f"Регистрация пользователя {username}", status="SUCCESS")
