@@ -10,6 +10,7 @@ import shutil
 import uuid
 from Database.db import save_recipe as db_save_recipes
 from Logger_logic import AuditLogger
+from Database.DB_backup import backup_before_change
 
 def open_recipe_manager(root_parent, User_id, username=None, on_save=None):
     root = Toplevel(root_parent)
@@ -126,6 +127,9 @@ def open_recipe_manager(root_parent, User_id, username=None, on_save=None):
         star_buttons.append(btn)
     
     def save_recipe():
+        # Создаём бэкап перед изменением БД
+        backup_before_change("create_recipe")
+        
         title = entry_title.get().strip()
         description = entry_description.get("1.0", "end").strip()
         rating = rating_var.get()
