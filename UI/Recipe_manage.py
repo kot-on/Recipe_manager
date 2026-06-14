@@ -157,7 +157,6 @@ def open_recipe_manager(root_parent, User_id, username=None, on_save=None):
 
         try:
             recipe_id = db_save_recipes(User_id, title, description, rating, dest_path, ingredients)
-            # Логируем создание рецепта
             current_username = username if username else f"user_{User_id}"
             AuditLogger.log(User_id, current_username, "CREATE_RECIPE", entity_type="RECIPE", entity_id=recipe_id, details=f"Создан рецепт: {title}", status="SUCCESS")
             messagebox.showinfo("Готово", f"Рецепт «{title}» сохранён!")
