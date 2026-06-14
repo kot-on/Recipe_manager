@@ -8,7 +8,7 @@ from AUTH.Register import register_user
 from Main_menu import open_main_window
 from PIL import Image,ImageTk
 import re
-from Logger_logic import AuditLogger  # ← ДОБАВИТЬ
+from Logger_logic import AuditLogger
 
 def open_register(root):
     reg_window = Toplevel()
@@ -66,7 +66,7 @@ def open_register(root):
             AuditLogger.log(User_id, username, "REGISTER", entity_type="USER", entity_id=User_id, details=f"Регистрация пользователя {username}", status="SUCCESS")
             reg_window.destroy()
             root.destroy()
-            open_main_window(User_id, username)  # ← передаём username
+            open_main_window(User_id, username)
         else:
             messagebox.showerror("Ошибка", "Пароли не совпадают")
         return 
