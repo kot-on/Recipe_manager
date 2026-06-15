@@ -1,8 +1,22 @@
 import sqlite3
 import os
-
+import shutil
 # Путь к бд, чтобы не писать его везде
 DB_PATH = os.path.join(os.path.dirname(__file__), '..', 'bd.db')
+BACKUP_DIR = os.path.join(os.path.dirname(__file__), '..', 'backbd')
+BACKUP_PATH = os.path.join(BACKUP_DIR, 'bd_backup.db')
+DB_PASSWORD = "K#9mX$vL2@pQ8nR!"
+
+def create_backup():
+    os.makedirs(BACKUP_DIR, exist_ok=True)
+    shutil.copy2(DB_PATH, BACKUP_PATH)
+
+def restore_from_backup():
+    if os.path.exists(BACKUP_PATH):
+        shutil.copy2(BACKUP_PATH, DB_PATH)
+        print("БД восстановлена из бэкапа")
+    else:
+        raise RuntimeError("Бэкап не найден, восстановление невозможно")
 
 def log_db(message: str):
     """Записывает сообщение в таблицу Logs"""
@@ -19,7 +33,18 @@ def log_db(message: str):
         print(f"[WARNING] Не удалось записать DB лог: {e}")
 
 def get_connection():
-    return sqlite3.connect(DB_PATH)
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        conn.execute(f"PRAGMA key='{DB_PASSWORD}';")
+        conn.execute("SELECT count(*) FROM sqlite_master;")
+        return conn
+    except Exception:
+        print("Основная БД повреждена, восстанавливаем из бэкапа...")
+        restore_from_backup()
+        conn = sqlite3.connect(DB_PATH)
+        conn.execute(f"PRAGMA key='{DB_PASSWORD}';")
+        conn.execute("SELECT count(*) FROM sqlite_master;")
+        return conn
 
 def show_3_recipes(User_id, limit=3):
     conn = get_connection()
@@ -55,6 +80,7 @@ def show_3_recipes(User_id, limit=3):
     return result
 
 def save_recipe(user_id, title, description, rating, image_path, ingredients):
+    create_backup()
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -109,6 +135,7 @@ def get_all_recipes(User_id):
     return result
 
 def delete_recipe(recipe_id):
+    create_backup()
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("DELETE FROM ingredients WHERE recipe_id = ?", (recipe_id,))
@@ -118,6 +145,7 @@ def delete_recipe(recipe_id):
     log_db(f"DELETE рецепт recipe_id={recipe_id}")
 
 def update_recipe(recipe_id, title, description, rating, image_path, ingredients):
+    create_backup() 
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute(
