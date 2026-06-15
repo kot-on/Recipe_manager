@@ -114,7 +114,7 @@ def load_all_recipes(User_id, username, frame, refresh):
         if recipe["ingredients"]:
             ing_text = "  •  ".join([f"{name} {amount}{unit}"
                                      for name, amount, unit in recipe["ingredients"]])
-            Label(text_frame, text=f"🧂 {ing_text}", font=('Inter', 12),
+            Label(text_frame, text=f" {ing_text}", font=('Inter', 12),
                   bg="#1E1E1E", fg="#AAAAAA", wraplength=700,
                   justify=LEFT).pack(anchor="w", pady=(4, 0))
 
