@@ -3,12 +3,14 @@ import sys
 from tkinter import *
 from tkinter import messagebox
 import customtkinter
-from Register import open_register
+from Register_window import open_register
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from AUTH.Login import login_user
 from Main_menu import open_main_window
 from PIL import Image,ImageTk
 import re
+from UI_logger import log_ui_action
+
 
 root = Tk()
 root.title("Login window")
@@ -37,6 +39,7 @@ entry_pass = customtkinter.CTkEntry(root,
 entry_pass.pack(pady=10) 
 
 def Gotoregister():
+    log_ui_action("Гость", "Нет аккаунта (переход на регистрацию)")
     root.withdraw()
     open_register(root) 
 
@@ -45,19 +48,23 @@ def login():
     password = entry_pass.get()
 
     if not re.match(r'^[A-Za-z0-9!@#$%^&*()_+\-=\[\]{};:\'",.<>?/\\|`~ ]+$', username):
+        log_ui_action(username or "Гость", "Войти - ошибка: недопустимый логин")
         messagebox.showerror("Ошибка", "Логин должен содержать только латинские символы")
         return
     
     if not re.match(r'^[A-Za-z0-9!@#$%^&*()_+\-=\[\]{};:\'",.<>?/\\|`~ ]+$', password):
+        log_ui_action(username or "Гость", "Войти - ошибка: недопустимый пароль")
         messagebox.showerror("Ошибка", "Пароль должен содержать только латинские символы")
         return
 
     User_id = login_user(username, password)
 
     if User_id:
+        log_ui_action(username, "Войти - успешный вход")
         root.destroy()
-        open_main_window(User_id, username)  # ← ИСПРАВЛЕНО
+        open_main_window(User_id, username)  
     else:
+        log_ui_action(username, "Войти - неверный логин или пароль")
         messagebox.showerror("Ошибка", "Неверный логин или пароль")
 
 btn = customtkinter.CTkButton(root,

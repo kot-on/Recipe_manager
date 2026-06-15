@@ -8,7 +8,8 @@ from AUTH.Register import register_user
 from Main_menu import open_main_window
 from PIL import Image,ImageTk
 import re
-from Logger_logic import AuditLogger
+from Core_logic.Logger_logic import AuditLogger
+from UI_logger import log_ui_action
 
 def open_register(root):
     reg_window = Toplevel()
@@ -49,24 +50,29 @@ def open_register(root):
         password2 = entry_pass2.get()
 
         if not re.match(r'^[A-Za-z0-9!@#$%^&*()_+\-=\[\]{};:\'",.<>?/\\|`~ ]+$', username):
+            log_ui_action(username or "Гость", "Зарегистрироваться - ошибка: недопустимый логин")
             messagebox.showerror("Ошибка", "Логин должен содержать только латинские символы")
             return
     
         if not re.match(r'^[A-Za-z0-9!@#$%^&*()_+\-=\[\]{};:\'",.<>?/\\|`~ ]+$', password1):
+            log_ui_action(username or "Гость", "Зарегистрироваться - ошибка: недопустимый пароль")
             messagebox.showerror("Ошибка", "Пароль должен содержать только латинские символы")
             return
 
         if len(password1) < 8:
+            log_ui_action(username, "Зарегистрироваться - ошибка: пароль короче 8 символов")
             messagebox.showerror("Ошибка", "Пароль должен содержать 8 и более символов")
             return
 
         if password1 == password2:
             User_id = register_user(username, password1)
             AuditLogger.log(User_id, username, "REGISTER", entity_type="USER", entity_id=User_id, details=f"Регистрация пользователя {username}", status="SUCCESS")
+            log_ui_action(username, "Зарегистрироваться - успешная регистрация")
             reg_window.destroy()
             root.destroy()
             open_main_window(User_id, username)
         else:
+            log_ui_action(username, "Зарегистрироваться - ошибка: пароли не совпадают")
             messagebox.showerror("Ошибка", "Пароли не совпадают")
         return 
 

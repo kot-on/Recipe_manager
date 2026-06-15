@@ -7,7 +7,7 @@ from Database.db import show_3_recipes
 from PIL import Image, ImageTk
 from Recipe_manage import open_recipe_manager
 from Recipe_view import open_all_recipes
-from UI_logger import open_logs_window
+from UI_logger import log_ui_action
 
 def open_main_window(User_id, username=None):
     root = Tk()
@@ -22,9 +22,7 @@ def open_main_window(User_id, username=None):
     logo_label.pack(pady=(20, 5))
     Label(root, text="Recipe manager", fg='#585B91', font=('Inter', 50), bg='Black').pack()
 
-    customtkinter.CTkButton(root, width=600, height=60, corner_radius=15, font=('Inter', 20), 
-                            text='Добавить рецепт', fg_color="#F54927", 
-                            command=lambda: open_recipe_manager(root, User_id, username, on_save=refresh)).pack(pady=15)
+    customtkinter.CTkButton(root, width=600, height=60, corner_radius=15, font=('Inter', 20), text='Добавить рецепт', fg_color="#F54927", command=lambda: [log_ui_action(username, "Добавить рецепт"), root.withdraw(),open_recipe_manager(root, User_id, username, on_save=refresh)]).pack(pady=15)
 
     recipes_frame = Frame(root, bg='Black')
     recipes_frame.pack(fill=BOTH, expand=True)
@@ -38,14 +36,7 @@ def open_main_window(User_id, username=None):
         # Загружаем заново
         load_recipes(User_id, recipes_frame)
 
-    customtkinter.CTkButton(root, text="Показать все рецепты", width=200, height=23,
-                            fg_color='black', font=('Inter', 15, "underline"), corner_radius=10,
-                            text_color='#63078E', command=lambda: open_all_recipes(root, User_id)).pack(pady=10)
-    
-    # Кнопка "Журнал событий"
-    customtkinter.CTkButton(root, text="Журнал событий", width=200, height=23,
-                            fg_color='black', font=('Inter', 15, "underline"), corner_radius=10,
-                            text_color='#63078E', command=open_logs_window).pack(pady=10)
+    customtkinter.CTkButton(root, text="Показать все рецепты", width=200, height=23,fg_color='black', font=('Inter', 15, "underline"), corner_radius=10,text_color='#63078E', command=lambda: [log_ui_action(username, "Показать все рецепты"),root.withdraw(),open_all_recipes(root, User_id,username,on_main_refresh=refresh)]).pack(pady=10)
     
     root.mainloop()
 

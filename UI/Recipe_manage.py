@@ -9,8 +9,9 @@ from PIL import Image, ImageTk
 import shutil
 import uuid
 from Database.db import save_recipe as db_save_recipes
-from Logger_logic import AuditLogger
+from Core_logic.Logger_logic import AuditLogger
 from Database.DB_backup import backup_before_change
+from UI_logger import log_ui_action
 
 def open_recipe_manager(root_parent, User_id, username=None, on_save=None):
     root = Toplevel(root_parent)
@@ -39,6 +40,7 @@ def open_recipe_manager(root_parent, User_id, username=None, on_save=None):
     def choose_image(event=None):
         path = filedialog.askopenfilename(filetypes=[("Изображения", "*.png *.jpg *.jpeg *.webp")])
         if path:
+            log_ui_action(username, "Выбрать фото рецепта")
             selected_image_path.set(path)
             img = Image.open(path).resize((300, 200))
             photo = ImageTk.PhotoImage(img)
@@ -84,7 +86,11 @@ def open_recipe_manager(root_parent, User_id, username=None, on_save=None):
         unit_menu = customtkinter.CTkOptionMenu(row_frame, values=["г", "мл", "шт", "ст.л", "ч.л"],variable=unit_var,width=100, height=40,font=('Inter', 16))
         unit_menu.pack(side=LEFT, padx=(0, 10))
 
-        delete_btn = customtkinter.CTkButton(row_frame, text="X", width=40, height=40,fg_color="#F54927", corner_radius=10,font=('Inter', 16),command=lambda: remove_row(row_frame, entry))
+        delete_btn = customtkinter.CTkButton(row_frame, text="X", width=40, height=40,fg_color="#F54927", corner_radius=10,font=('Inter', 16),
+                                             command=lambda: [
+                                                 log_ui_action(username, "Удалить ингредиент"),
+                                                 remove_row(row_frame, entry)
+                                             ])
         delete_btn.pack(side=LEFT)
 
         entry = (name_entry, amount_entry, unit_var)
@@ -98,7 +104,12 @@ def open_recipe_manager(root_parent, User_id, username=None, on_save=None):
 
     add_ingredient_row()
 
-    customtkinter.CTkButton(center_frame, text="+ Добавить ингредиент",width=300, height=40, corner_radius=10,font=('Inter', 16), fg_color="#63078E",command=add_ingredient_row).pack(pady=10)
+    customtkinter.CTkButton(center_frame, text="+ Добавить ингредиент",width=300, height=40, corner_radius=10,
+                            font=('Inter', 16), fg_color="#63078E",
+                            command=lambda: [
+                                log_ui_action(username, "Добавить ингредиент"),
+                                add_ingredient_row()
+                            ]).pack(pady=10)
 
     Label(center_frame, text="Рейтинг", fg='white',
       font=('Inter', 16), bg='Black').pack(anchor="w", pady=(15, 0))
@@ -110,6 +121,7 @@ def open_recipe_manager(root_parent, User_id, username=None, on_save=None):
     star_buttons = []
 
     def set_rating(value):
+        log_ui_action(username, f"Выбрать рейтинг: {value} звёзд")
         rating_var.set(value)
         for i, btn in enumerate(star_buttons):
             if i < value:
@@ -125,17 +137,17 @@ def open_recipe_manager(root_parent, User_id, username=None, on_save=None):
                                    command=lambda v=i: set_rating(v))
         btn.pack(side=LEFT, padx=2)
         star_buttons.append(btn)
-    
+
     def save_recipe():
-        # Создаём бэкап перед изменением БД
         backup_before_change("create_recipe")
-        
+
         title = entry_title.get().strip()
         description = entry_description.get("1.0", "end").strip()
         rating = rating_var.get()
         src_path = selected_image_path.get()
 
         if not title:
+            log_ui_action(username, "Сохранить рецепт - ошибка: нет названия")
             messagebox.showerror("Ошибка", "Введите название рецепта")
             return
 
@@ -148,6 +160,7 @@ def open_recipe_manager(root_parent, User_id, username=None, on_save=None):
                 ingredients.append((name, amount, unit))
 
         if not ingredients:
+            log_ui_action(username, "Сохранить рецепт - ошибка: нет ингредиентов")
             messagebox.showerror("Ошибка", "Добавьте хотя бы один ингредиент")
             return
 
@@ -163,17 +176,16 @@ def open_recipe_manager(root_parent, User_id, username=None, on_save=None):
             recipe_id = db_save_recipes(User_id, title, description, rating, dest_path, ingredients)
             current_username = username if username else f"user_{User_id}"
             AuditLogger.log(User_id, current_username, "CREATE_RECIPE", entity_type="RECIPE", entity_id=recipe_id, details=f"Создан рецепт: {title}", status="SUCCESS")
+            log_ui_action(username, f"Сохранить рецепт - успешно: {title}")
             messagebox.showinfo("Готово", f"Рецепт «{title}» сохранён!")
             root.destroy()
+            root_parent.deiconify()
             if on_save:
                 on_save()
         except Exception as e:
+            log_ui_action(username, f"Сохранить рецепт - ошибка: {e}")
             messagebox.showerror("Ошибка", f"Не удалось сохранить: {e}")
 
-    customtkinter.CTkButton(center_frame, text="Сохранить рецепт",width=620, height=55, corner_radius=15,font=('Inter', 22), fg_color="#F54927",command=save_recipe).pack(pady=15)
-
-if __name__ == "__main__":
-    root = Tk()
-    root.withdraw()
-    open_recipe_manager(root, User_id=1)
-    root.mainloop()
+    customtkinter.CTkButton(center_frame, text="Сохранить рецепт",width=620, height=55, corner_radius=15,
+                            font=('Inter', 22), fg_color="#F54927",
+                            command=save_recipe).pack(pady=15)

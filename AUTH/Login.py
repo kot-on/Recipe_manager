@@ -4,7 +4,7 @@ import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from Database.db import get_connection
-from Logger_logic import AuditLogger
+from Core_logic.Logger_logic import AuditLogger
 
 def login_user(username, password):
     password_hash = hashlib.sha256(password.encode()).hexdigest()
@@ -12,9 +12,9 @@ def login_user(username, password):
     conn = get_connection()
     cursor = conn.cursor()
     
-    # Исправлено: username вместо login
+   
     cursor.execute(
-        "SELECT id, password FROM users WHERE username = ?",
+        "SELECT id, password_hash FROM users WHERE login = ?",
         (username,)
     )
     
